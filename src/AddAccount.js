@@ -16,15 +16,26 @@ const Button = styled.button`
   margin-top: 16px;
 `
 
+const Validation = styled.div`
+  color: red;
+`
+
 const AddAccount = () => {
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
-  const pass = usePass()
+  const [pass, setPass] = useState('')
+  const correctPass = usePass()
+  const [error, setError] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    addAccount(name, code, pass)
-      .catch(console.error)
+
+    if (pass === correctPass) {
+      addAccount(name, code, pass)
+        .catch(err => setError(err.message))
+    } else {
+      setError('Wrong passphrase')
+    }
   }
 
   return (
@@ -39,12 +50,13 @@ const AddAccount = () => {
           <TextField name="code" value={code} onChange={e => setCode(e.target.value)} />
         </label>
         <label>
-          <Label>Passphrase</Label>
-          <TextField name="pass" type="password" value={pass} onChange={e => { e.preventDefault() }} />
+          <Label>Enter your passphrase again</Label>
+          <TextField name="pass" type="password" value={pass} onChange={e => setPass(e.target.value)} />
         </label>
         <Button type="submit">
           Save account
         </Button>
+        {error && <Validation>{error}</Validation>}
       </form>
     </Container>
   )

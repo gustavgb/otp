@@ -5,6 +5,7 @@ import generateCode from './generateCode'
 const Container = styled.div`
   padding: 16px 0;
   display: grid;
+  grid-template-rows: repeat(3, 1fr);
   width: 100%;
   height: 100%;
   place-items: center;
@@ -18,7 +19,9 @@ const Header = styled.p`
 const Code = styled.p`
   font-size: 2rem;
   font-weight: bold;
+  font-family: monospace;
   letter-spacing: 1rem;
+  margin-right: -1rem;
 `
 
 const Account = ({ account = {} }) => {

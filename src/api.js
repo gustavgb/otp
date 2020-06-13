@@ -1,14 +1,14 @@
 import firebase from 'firebase/app'
 import 'firebase/firestore'
 import 'firebase/auth'
-import { collectionData } from 'rxfire/firestore'
+import { collectionData, docData } from 'rxfire/firestore'
 import { map } from 'rxjs/operators'
 
 import aes from 'crypto-js/aes'
 import encUtf8 from 'crypto-js/enc-utf8'
 
-const encrypt = (message, pass) => aes.encrypt(message, pass).toString()
-const decrypt = (message, pass) => aes.decrypt(message, pass).toString(encUtf8)
+export const encrypt = (message, pass) => aes.encrypt(message, pass).toString()
+export const decrypt = (message, pass) => aes.decrypt(message, pass).toString(encUtf8)
 const matchContent = /^(.*)\|([A-Z2-7]*)$/
 
 const app = firebase.initializeApp({
@@ -28,11 +28,11 @@ export const addAccount = (name, code, pass) => {
   const user = auth.currentUser
 
   if (!user) {
-    throw new Error('Not logged in')
+    return Promise.reject(new Error('Not logged in'))
   }
 
   if (!name || !code || !pass) {
-    throw new Error('Missing parameters')
+    return Promise.reject(new Error('Missing parameters'))
   }
 
   const uid = user.uid
@@ -48,11 +48,11 @@ export const streamAccounts = (pass) => {
   const user = auth.currentUser
 
   if (!user) {
-    throw new Error('Not logged in')
+    return Promise.reject(new Error('Not logged in'))
   }
 
   if (!pass) {
-    throw new Error('Missing parameters')
+    return Promise.reject(new Error('Missing parameters'))
   }
 
   const uid = user.uid
@@ -77,4 +77,37 @@ export const streamAccounts = (pass) => {
         .filter(Boolean)
       )
     )
+}
+
+export const streamUserKey = () => {
+  const user = auth.currentUser
+
+  if (!user) {
+    return Promise.reject(new Error('Not logged in'))
+  }
+
+  const uid = user.uid
+
+  return docData(firestore.doc(`users/${uid}`), 'id')
+    .pipe(
+      map(user => user ? user.key : null)
+    )
+}
+
+export const createUserKey = (pass) => {
+  const user = auth.currentUser
+
+  if (!user) {
+    return Promise.reject(new Error('Not logged in'))
+  }
+
+  if (!pass) {
+    return Promise.reject(new Error('Missing parameters'))
+  }
+
+  const uid = user.uid
+
+  return firestore.doc(`users/${uid}`).set({
+    key: encrypt(new Date().toString(), pass)
+  })
 }

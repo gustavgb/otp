@@ -33,6 +33,7 @@ function App () {
   const [user, setUser] = useState(null)
   const [selected, setSelected] = useState(0)
   const [accounts, setAccounts] = useState([])
+  const [ready, setReady] = useState(false)
 
   const selectedAccount = accounts.find((_, index) => index === selected)
 
@@ -45,15 +46,18 @@ function App () {
       .subscribe(setAccounts)
 
     return () => stream.unsubscribe()
-  }, [setAccounts, pass])
+  }, [setAccounts, pass, user])
 
   useEffect(() => {
     auth.onAuthStateChanged(user => {
       setUser(user)
+      setReady(true)
     })
   }, [])
 
-  console.log(selectedAccount)
+  if (!ready) {
+    return null
+  }
 
   return (
     <PassProvider value={pass}>
