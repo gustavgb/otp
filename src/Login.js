@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { auth } from './api'
+import TextField from './TextField'
 
 const LoginForm = styled.form``
-
-const Input = styled.input``
 
 const Label = styled.p`
 
@@ -32,11 +31,11 @@ const Login = () => {
     <LoginForm onSubmit={handleSubmit}>
       <label>
         <Label>Email</Label>
-        <Input value={email} onChange={e => setEmail(e.target.value)} />
+        <TextField value={email} onChange={e => setEmail(e.target.value)} />
       </label>
       <label>
         <Label>Password</Label>
-        <Input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+        <TextField type="password" value={password} onChange={e => setPassword(e.target.value)} />
       </label>
       <Button type="submit">Login</Button>
     </LoginForm>
