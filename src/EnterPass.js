@@ -17,7 +17,7 @@ const Container = styled.form`
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-rows: min-content 1fr min-content;
+  grid-template-rows: min-content 1fr 1fr min-content;
   place-items: center;
   grid-column: 1 / 3;
 
@@ -33,10 +33,20 @@ const Row = styled.div`
   flex-direction: row;
   align-items: stretch;
   width: 100%;
+  align-self: end;
 
   @media (max-width: 680px) {
     flex-direction: column;
   }
+`
+
+const Options = styled.label`
+  align-self: start;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
 `
 
 const Validation = styled.div`
@@ -48,6 +58,7 @@ function EnterPass ({ onSubmit }) {
   const [userKey, setUserKey] = useState(null)
   const [failed, setFailed] = useState(false)
   const [ready, setReady] = useState(false)
+  const [savePass, setSavePass] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -57,7 +68,9 @@ function EnterPass ({ onSubmit }) {
     if (!userKey || decrypt(userKey, hashedPass)) {
       onSubmit(hashedPass)
 
-      window.sessionStorage.setItem('pass', hashedPass)
+      if (savePass) {
+        window.sessionStorage.setItem('pass', hashedPass)
+      }
 
       if (!userKey) {
         createUserKey(hashedPass)
@@ -104,6 +117,10 @@ function EnterPass ({ onSubmit }) {
           Done
         </Button>
       </Row>
+      <Options>
+        <input type="checkbox" value={savePass} onChange={(e) => setSavePass(e.target.checked)} />
+        Save passphrase in this session?
+      </Options>
       {failed && (
         <Validation>Wrong passphrase</Validation>
       )}

@@ -34,7 +34,7 @@ const Login = () => {
     <LoginForm onSubmit={handleSubmit}>
       <label>
         <Label>Email</Label>
-        <TextField value={email} onChange={e => setEmail(e.target.value)} />
+        <TextField autoFocus value={email} onChange={e => setEmail(e.target.value)} />
       </label>
       <label>
         <Label>Password</Label>

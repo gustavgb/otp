@@ -80,6 +80,9 @@ function App () {
 
       if (!user) {
         window.sessionStorage.clear()
+        setAccounts([])
+        setSelected(0)
+        setPass(null)
       }
     })
   }, [])
