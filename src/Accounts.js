@@ -5,6 +5,12 @@ import plus from './plus.svg'
 const Sidebar = styled.div`
   border-right: 1px solid #ddd;
   padding-right: 16px;
+  grid-area: sidebar;
+
+  @media (max-width: 680px) {
+    border-top: 1px solid #ddd;
+    border-right: none;
+  }
 `
 
 const Toolbar = styled.div`

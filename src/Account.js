@@ -9,6 +9,11 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
   place-items: center;
+  grid-area: content;
+
+  & > * {
+    margin: 0;
+  }
 `
 
 const Header = styled.p`

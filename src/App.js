@@ -15,17 +15,35 @@ const Root = styled.main`
   grid-template-areas: ". . ." ". main ." ". . .";
   background-color: #333;
   min-height: 100vh;
+
+  @media (max-width: 680px) {
+    grid-template-areas: "main main main" "main main main" "main main main";
+  }
 `
 
 const Content = styled.div`
   grid-area: main;
   display: grid;
   grid-template-columns: 1fr 2fr;
+  grid-template-areas: "sidebar content";
   gap: 16px;
   background-color: white;
   border-radius: 4px;
   box-shadow: 0px 2px 4px -1px rgba(0,0,0,0.2),0px 4px 5px 0px rgba(0,0,0,0.14),0px 1px 10px 0px rgba(0,0,0,0.12);
   padding: 16px;
+  max-height: 60vh;
+
+  & > * {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  @media (max-width: 680px) {
+    max-height: 100vh;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 2fr;
+    grid-template-areas: "content" "sidebar";
+  }
 `
 
 function App () {
@@ -69,7 +87,7 @@ function App () {
                 <>
                   <Accounts onSelect={setSelected} accounts={accounts} />
                   {selected === 'new'
-                    ? <AddAccount />
+                    ? <AddAccount onSelect={setSelected} />
                     : selectedAccount ? <Account account={selectedAccount} /> : null}
                 </>
               )

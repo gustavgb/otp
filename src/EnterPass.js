@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { streamUserKey, decrypt, createUserKey } from './api'
+import { streamUserKey, decrypt, createUserKey, hash } from './api'
 
 const Input = styled.input`
   padding: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
 `
 
-const Button = styled.button``
+const Button = styled.button`
+  flex: 0 0 auto;
+`
 
 const Container = styled.form`
   width: 100%;
@@ -15,6 +20,11 @@ const Container = styled.form`
   grid-template-rows: min-content 1fr min-content;
   place-items: center;
   grid-column: 1 / 3;
+
+  @media (max-width: 680px) {
+    grid-row: 1 / 3;
+    grid-column: 1;
+  }
 `
 
 const Row = styled.div`
@@ -22,7 +32,11 @@ const Row = styled.div`
   flex-wrap: nowrap;
   flex-direction: row;
   align-items: stretch;
-  width: 50%;
+  width: 100%;
+
+  @media (max-width: 680px) {
+    flex-direction: column;
+  }
 `
 
 const Validation = styled.div`
@@ -38,11 +52,15 @@ function EnterPass ({ onSubmit }) {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    if (!userKey || decrypt(userKey, pass)) {
-      onSubmit(pass)
+    const hashedPass = hash(pass)
+
+    if (!userKey || decrypt(userKey, hashedPass)) {
+      onSubmit(hashedPass)
+
+      window.sessionStorage.setItem('pass', hashedPass)
 
       if (!userKey) {
-        createUserKey(pass)
+        createUserKey(hashedPass)
       }
     } else {
       setFailed(true)
@@ -53,11 +71,17 @@ function EnterPass ({ onSubmit }) {
     const stream = streamUserKey()
       .subscribe(res => {
         setUserKey(res)
-        setReady(true)
+
+        const savedPass = window.sessionStorage.getItem('pass')
+        if (savedPass && decrypt(res, savedPass)) {
+          onSubmit(savedPass)
+        } else {
+          setReady(true)
+        }
       })
 
     return () => stream.unsubscribe()
-  }, [setUserKey])
+  }, [setUserKey, onSubmit])
 
   if (!ready) {
     return null

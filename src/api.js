@@ -6,10 +6,14 @@ import { map } from 'rxjs/operators'
 
 import aes from 'crypto-js/aes'
 import encUtf8 from 'crypto-js/enc-utf8'
+import SHA3 from 'crypto-js/sha3'
 
+export const hash = (message) => SHA3(message).toString()
 export const encrypt = (message, pass) => aes.encrypt(message, pass).toString()
 export const decrypt = (message, pass) => aes.decrypt(message, pass).toString(encUtf8)
 const matchContent = /^(.*)\|([A-Z2-7]*)$/
+
+window.hash = hash
 
 const app = firebase.initializeApp({
   apiKey: 'AIzaSyAJYuy1Qs3WZ_Ne0Y7VsnYFKxx9ut3O7_w',
@@ -40,7 +44,8 @@ export const addAccount = (name, code, pass) => {
   const contentEncrypted = encrypt(content, pass)
 
   return firestore.collection(`users/${uid}/accounts`).add({
-    content: contentEncrypted
+    content: contentEncrypted,
+    createDate: firebase.firestore.FieldValue.serverTimestamp()
   })
 }
 
@@ -57,7 +62,11 @@ export const streamAccounts = (pass) => {
 
   const uid = user.uid
 
-  return collectionData(firestore.collection(`users/${uid}/accounts`), 'id')
+  const ref = firestore
+    .collection(`users/${uid}/accounts`)
+    .orderBy('createDate')
+
+  return collectionData(ref, 'id')
     .pipe(
       map(accounts => accounts
         .map(account => {

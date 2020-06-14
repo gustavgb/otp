@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { addAccount } from './api'
+import { addAccount, hash } from './api'
 import { usePass } from './pass'
 import TextField from './TextField'
 
 const Container = styled.div`
+  grid-area: content;
 `
 
 const Label = styled.p`
@@ -20,7 +21,7 @@ const Validation = styled.div`
   color: red;
 `
 
-const AddAccount = () => {
+const AddAccount = ({ onSelect }) => {
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
   const [pass, setPass] = useState('')
@@ -30,8 +31,9 @@ const AddAccount = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    if (pass === correctPass) {
-      addAccount(name, code, pass)
+    if (hash(pass) === correctPass) {
+      addAccount(name, code, correctPass)
+        .then(() => onSelect(0))
         .catch(err => setError(err.message))
     } else {
       setError('Wrong passphrase')
