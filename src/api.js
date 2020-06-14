@@ -53,11 +53,11 @@ export const streamAccounts = (pass) => {
   const user = auth.currentUser
 
   if (!user) {
-    return Promise.reject(new Error('Not logged in'))
+    throw new Error('Not logged in')
   }
 
   if (!pass) {
-    return Promise.reject(new Error('Missing parameters'))
+    throw new Error('Missing parameters')
   }
 
   const uid = user.uid
@@ -92,7 +92,7 @@ export const streamUserKey = () => {
   const user = auth.currentUser
 
   if (!user) {
-    return Promise.reject(new Error('Not logged in'))
+    throw new Error('Not logged in')
   }
 
   const uid = user.uid

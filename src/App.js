@@ -7,6 +7,7 @@ import Accounts from './Accounts'
 import Account from './Account'
 import EnterPass from './EnterPass'
 import AddAccount from './AddAccount'
+import Toolbar from './Toolbar'
 
 const Root = styled.main`
   display: grid;
@@ -24,8 +25,9 @@ const Root = styled.main`
 const Content = styled.div`
   grid-area: main;
   display: grid;
-  grid-template-columns: 1fr 2fr;
-  grid-template-areas: "sidebar content";
+  grid-template-columns: 1fr 2fr [end];
+  grid-template-rows: 1fr min-content [end];
+  grid-template-areas: "sidebar content" "toolbar toolbar";
   gap: 16px;
   background-color: white;
   border-radius: 4px;
@@ -40,9 +42,10 @@ const Content = styled.div`
 
   @media (max-width: 680px) {
     max-height: 100vh;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 2fr;
-    grid-template-areas: "content" "sidebar";
+    grid-template-columns: 1fr [end];
+    grid-template-rows: 1fr 2fr min-content [end];
+    grid-template-areas: "content" "sidebar" "toolbar";
+    border-radius: 0;
   }
 `
 
@@ -60,16 +63,24 @@ function App () {
       return
     }
 
-    const stream = streamAccounts(pass)
-      .subscribe(setAccounts)
+    try {
+      const stream = streamAccounts(pass)
+        .subscribe(setAccounts)
 
-    return () => stream.unsubscribe()
+      return () => stream.unsubscribe()
+    } catch (e) {
+      console.log(e)
+    }
   }, [setAccounts, pass, user])
 
   useEffect(() => {
     auth.onAuthStateChanged(user => {
       setUser(user)
       setReady(true)
+
+      if (!user) {
+        window.sessionStorage.clear()
+      }
     })
   }, [])
 
@@ -97,6 +108,7 @@ function App () {
             : (
               <Login />
             )}
+          {user && <Toolbar user={user} />}
         </Content>
       </Root>
     </PassProvider>

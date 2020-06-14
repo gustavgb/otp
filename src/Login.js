@@ -3,7 +3,10 @@ import styled from 'styled-components'
 import { auth } from './api'
 import TextField from './TextField'
 
-const LoginForm = styled.form``
+const LoginForm = styled.form`
+  grid-column: 1 / end;
+  grid-row: 1 / end;
+`
 
 const Label = styled.p`
 
