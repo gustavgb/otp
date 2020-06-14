@@ -1,13 +1,23 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './index.css'
+import './assets/global.css'
 import App from './App'
 import * as serviceWorker from './serviceWorker'
+import { Helmet } from 'react-helmet'
+import icon from './assets/icon.png'
+
+const Main = () => (
+  <>
+    <Helmet>
+      <title>OTP</title>
+      <link rel="icon" href={icon} />
+    </Helmet>
+    <App />
+  </>
+)
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <Main />,
   document.getElementById('root')
 )
 

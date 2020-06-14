@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import generateCode from './generateCode'
+import generateCode from './utils/generateCode'
 
 const Container = styled.div`
   padding: 16px 0;

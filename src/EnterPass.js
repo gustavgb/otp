@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { streamUserKey, decrypt, createUserKey, hash } from './api'
+import { streamUserKey, decrypt, createUserKey, hash } from './utils/api'
 
 const Input = styled.input`
   padding: 10px;

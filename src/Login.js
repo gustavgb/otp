@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { auth } from './api'
+import { auth } from './utils/api'
 import TextField from './TextField'
 
 const LoginForm = styled.form`

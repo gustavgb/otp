@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { addAccount, hash } from './api'
-import { usePass } from './pass'
+import { addAccount, hash } from './utils/api'
+import { usePass } from './utils/pass'
 import TextField from './TextField'
 
 const Container = styled.div`
@@ -33,7 +33,7 @@ const AddAccount = ({ onSelect }) => {
 
     if (hash(pass) === correctPass) {
       addAccount(name, code, correctPass)
-        .then(() => onSelect(0))
+        .then((doc) => onSelect(doc.id))
         .catch(err => setError(err.message))
     } else {
       setError('Wrong passphrase')

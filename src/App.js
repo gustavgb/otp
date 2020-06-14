@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { PassProvider } from './pass'
+import { PassProvider } from './utils/pass'
 import Login from './Login'
-import { auth, streamAccounts } from './api'
+import { auth, streamAccounts } from './utils/api'
 import Accounts from './Accounts'
 import Account from './Account'
 import EnterPass from './EnterPass'
 import AddAccount from './AddAccount'
 import Toolbar from './Toolbar'
+import bananas from './assets/bananas.png'
 
 const Root = styled.main`
   display: grid;
   grid-template-columns: 20vw 1fr 20vw;
   grid-template-rows: 20vh 1fr 20vh;
   grid-template-areas: ". . ." ". main ." ". . .";
-  background-color: #333;
+  background-image: url(${bananas});
   min-height: 100vh;
 
   @media (max-width: 680px) {
@@ -52,11 +53,13 @@ const Content = styled.div`
 function App () {
   const [pass, setPass] = useState(null)
   const [user, setUser] = useState(null)
-  const [selected, setSelected] = useState(0)
+  const [selected, setSelected] = useState(null)
   const [accounts, setAccounts] = useState([])
   const [ready, setReady] = useState(false)
+  const [showAll, setShowAll] = useState(false)
 
-  const selectedAccount = accounts.find((_, index) => index === selected)
+  const filteredAccounts = accounts.filter(account => !account.disabled || showAll)
+  const selectedAccount = filteredAccounts.find((account) => account.id === selected)
 
   useEffect(() => {
     if (!pass) {
@@ -81,7 +84,7 @@ function App () {
       if (!user) {
         window.sessionStorage.clear()
         setAccounts([])
-        setSelected(0)
+        setSelected(null)
         setPass(null)
       }
     })
@@ -99,7 +102,7 @@ function App () {
             ? pass
               ? (
                 <>
-                  <Accounts onSelect={setSelected} accounts={accounts} />
+                  <Accounts onSelect={setSelected} accounts={filteredAccounts} />
                   {selected === 'new'
                     ? <AddAccount onSelect={setSelected} />
                     : selectedAccount ? <Account account={selectedAccount} /> : null}
@@ -111,7 +114,7 @@ function App () {
             : (
               <Login />
             )}
-          {user && <Toolbar user={user} />}
+          {user && <Toolbar user={user} onToggleShow={() => setShowAll(!showAll)} />}
         </Content>
       </Root>
     </PassProvider>

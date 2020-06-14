@@ -1,5 +1,5 @@
 import React from 'react'
-import { auth } from './api'
+import { auth } from './utils/api'
 import styled from 'styled-components'
 
 const Row = styled.div`
@@ -9,20 +9,28 @@ const Row = styled.div`
   flex-wrap: nowrap;
   align-items: center;
   width: 100%;
-  justify-content: space-between;
 `
 
-const Button = styled.button``
+const Button = styled.button`
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  color: #aaa;
+  cursor: pointer;
+  margin-left: 16px;
+`
 
 const User = styled.p`
   margin: 0;
   color: #aaa;
+  flex: 1 0 auto;
 `
 
-const Toolbar = ({ user }) => {
+const Toolbar = ({ user, onToggleShow }) => {
   return (
     <Row>
       <User>{user.email}</User>
+      <Button onClick={onToggleShow}>Show/hide disabled</Button>
       <Button onClick={() => auth.signOut()}>Sign out</Button>
     </Row>
   )

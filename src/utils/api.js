@@ -49,6 +49,33 @@ export const addAccount = (name, code, pass) => {
   })
 }
 
+export const toggleAccountDisabled = (id) => {
+  const user = auth.currentUser
+
+  if (!user) {
+    return Promise.reject(new Error('Not logged in'))
+  }
+
+  if (!id) {
+    return Promise.reject(new Error('Missing parameters'))
+  }
+
+  const uid = user.uid
+
+  const ref = firestore.doc(`users/${uid}/accounts/${id}`)
+  return firestore.runTransaction(transaction => {
+    return transaction.get(ref).then(doc => {
+      if (!doc.exists) {
+        throw new Error('Account not found')
+      }
+
+      transaction.update(ref, {
+        disabled: !doc.data().disabled
+      })
+    })
+  })
+}
+
 export const streamAccounts = (pass) => {
   const user = auth.currentUser
 
@@ -76,7 +103,7 @@ export const streamAccounts = (pass) => {
             const [, name, code] = decrypted.match(matchContent)
 
             return {
-              id: account.id,
+              ...account,
               name,
               code
             }
