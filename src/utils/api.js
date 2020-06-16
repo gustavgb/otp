@@ -6,14 +6,10 @@ import { map } from 'rxjs/operators'
 
 import aes from 'crypto-js/aes'
 import encUtf8 from 'crypto-js/enc-utf8'
-import SHA3 from 'crypto-js/sha3'
 import shortid from 'shortid'
 
-export const hash = (message) => SHA3(message).toString()
 export const encrypt = (message, pass) => aes.encrypt(message, pass).toString()
 export const decrypt = (message, pass) => aes.decrypt(message, pass).toString(encUtf8)
-
-window.hash = hash
 
 const app = firebase.initializeApp({
   apiKey: 'AIzaSyAJYuy1Qs3WZ_Ne0Y7VsnYFKxx9ut3O7_w',
