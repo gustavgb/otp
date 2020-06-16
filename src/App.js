@@ -56,10 +56,10 @@ function App () {
   const [selected, setSelected] = useState(null)
   const [accounts, setAccounts] = useState([])
   const [ready, setReady] = useState(false)
-  const [showAll, setShowAll] = useState(false)
 
-  const filteredAccounts = accounts.filter(account => !account.disabled || showAll)
-  const selectedAccount = filteredAccounts.find((account) => account.id === selected)
+  const selectedAccount = accounts.find((account) => account.id === selected)
+
+  const uid = user ? user.uid : null
 
   useEffect(() => {
     if (!pass) {
@@ -82,7 +82,6 @@ function App () {
       setReady(true)
 
       if (!user) {
-        window.sessionStorage.clear()
         setAccounts([])
         setSelected(null)
         setPass(null)
@@ -102,19 +101,19 @@ function App () {
             ? pass
               ? (
                 <>
-                  <Accounts onSelect={setSelected} accounts={filteredAccounts} />
+                  <Accounts onSelect={setSelected} accounts={accounts} />
                   {selected === 'new'
                     ? <AddAccount onSelect={setSelected} />
-                    : selectedAccount ? <Account account={selectedAccount} /> : null}
+                    : selectedAccount ? <Account key={selected} account={selectedAccount} /> : null}
                 </>
               )
               : (
-                <EnterPass onSubmit={setPass} />
+                <EnterPass onSetPass={setPass} uid={uid} />
               )
             : (
               <Login />
             )}
-          {user && <Toolbar user={user} onToggleShow={() => setShowAll(!showAll)} />}
+          {user && <Toolbar user={user} />}
         </Content>
       </Root>
     </PassProvider>

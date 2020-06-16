@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { addAccount, hash } from './utils/api'
-import { usePass } from './utils/pass'
+import { addAccount } from './utils/api'
 import TextField from './TextField'
 
 const Container = styled.div`
@@ -25,19 +24,17 @@ const AddAccount = ({ onSelect }) => {
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
   const [pass, setPass] = useState('')
-  const correctPass = usePass()
   const [error, setError] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    if (hash(pass) === correctPass) {
-      addAccount(name, code, correctPass)
-        .then((doc) => onSelect(doc.id))
-        .catch(err => setError(err.message))
-    } else {
-      setError('Wrong passphrase')
-    }
+    addAccount(name, code, pass)
+      .then(id => onSelect(id))
+      .catch(err => {
+        console.log(err)
+        setError(err.message)
+      })
   }
 
   return (

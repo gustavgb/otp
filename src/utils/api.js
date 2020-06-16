@@ -7,11 +7,11 @@ import { map } from 'rxjs/operators'
 import aes from 'crypto-js/aes'
 import encUtf8 from 'crypto-js/enc-utf8'
 import SHA3 from 'crypto-js/sha3'
+import shortid from 'shortid'
 
 export const hash = (message) => SHA3(message).toString()
 export const encrypt = (message, pass) => aes.encrypt(message, pass).toString()
 export const decrypt = (message, pass) => aes.decrypt(message, pass).toString(encUtf8)
-const matchContent = /^(.*)\|([A-Z2-7]*)$/
 
 window.hash = hash
 
@@ -40,16 +40,35 @@ export const addAccount = (name, code, pass) => {
   }
 
   const uid = user.uid
-  const content = name + '|' + code.toUpperCase().replace(/\s/g, '')
-  const contentEncrypted = encrypt(content, pass)
 
-  return firestore.collection(`users/${uid}/accounts`).add({
-    content: contentEncrypted,
-    createDate: firebase.firestore.FieldValue.serverTimestamp()
+  return firestore.runTransaction(transaction => {
+    return transaction.get(firestore.doc(`users/${uid}`)).then(doc => {
+      if (!doc.exists) {
+        throw new Error('User key does not exist')
+      }
+
+      const userKey = doc.data().key
+
+      if (decrypt(userKey, pass)) {
+        const id = shortid.generate()
+
+        const mappedCode = code.replace(/\s/g, '')
+
+        transaction.set(firestore.doc(`users/${uid}/accounts/${id}`), {
+          name: encrypt(name, pass),
+          code: encrypt(mappedCode, pass),
+          createDate: firebase.firestore.FieldValue.serverTimestamp()
+        })
+
+        return id
+      } else {
+        throw new Error('Wrong password')
+      }
+    })
   })
 }
 
-export const toggleAccountDisabled = (id) => {
+export const toggleAccountDeleted = (id) => {
   const user = auth.currentUser
 
   if (!user) {
@@ -69,8 +88,10 @@ export const toggleAccountDisabled = (id) => {
         throw new Error('Account not found')
       }
 
+      const isDeleted = !!doc.data().deleted
+
       transaction.update(ref, {
-        disabled: !doc.data().disabled
+        deleted: isDeleted ? false : firebase.firestore.FieldValue.serverTimestamp()
       })
     })
   })
@@ -97,20 +118,27 @@ export const streamAccounts = (pass) => {
     .pipe(
       map(accounts => accounts
         .map(account => {
-          const decrypted = decrypt(account.content, pass)
+          const decryptedName = decrypt(account.name, pass)
+          const decryptedCode = decrypt(account.code, pass)
 
-          if (decrypted) {
-            const [, name, code] = decrypted.match(matchContent)
-
+          if (decryptedName) {
             return {
               ...account,
-              name,
-              code
+              name: decryptedName,
+              code: decryptedCode
             }
           }
           return null
         })
         .filter(Boolean)
+        .sort((a, b) => {
+          if (a.name < b.name) {
+            return -1
+          } else if (a.name > b.name) {
+            return 1
+          }
+          return 0
+        })
       )
     )
 }
@@ -147,3 +175,5 @@ export const createUserKey = (pass) => {
     key: encrypt(new Date().toString(), pass)
   })
 }
+
+export const authSetNoPersistence = () => auth.setPersistence(firebase.auth.Auth.Persistence.NONE)

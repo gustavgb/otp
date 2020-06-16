@@ -17,16 +17,22 @@ const Button = styled.button`
   margin-top: 16px;
 `
 
+const Validation = styled.div`
+  color: red;
+`
+
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
       await auth.signInWithEmailAndPassword(email, password)
     } catch (err) {
-      console.error(err)
+      console.log(err)
+      setError(err.message)
     }
   }
 
@@ -41,6 +47,7 @@ const Login = () => {
         <TextField type="password" value={password} onChange={e => setPassword(e.target.value)} />
       </label>
       <Button type="submit">Login</Button>
+      {!!error && <Validation>{error}</Validation>}
     </LoginForm>
   )
 }

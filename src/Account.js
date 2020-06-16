@@ -29,19 +29,42 @@ const Code = styled.p`
   margin-right: -1rem;
 `
 
+const Validation = styled.div`
+  color: red;
+`
+
 const Account = ({ account = {} }) => {
   const [otp, setOtp] = useState('')
-  const [refreshKey, setRefresh] = useState(0)
+  const [remaining, setRemaining] = useState(0)
+  const code = account ? account.code : null
 
   useEffect(() => {
-    setOtp(generateCode(account.code))
-  }, [refreshKey, account.code])
+    let unmounted = false
+    if (remaining <= 0) {
+      if (code) {
+        setOtp(generateCode(code))
+      }
+
+      const time = 30 - Math.floor((Date.now() % 30000) / 1000)
+      setRemaining(time)
+    } else {
+      setTimeout(() => {
+        if (!unmounted) {
+          setRemaining(remaining - 1)
+        }
+      }, 1000)
+    }
+
+    return () => {
+      unmounted = true
+    }
+  }, [remaining, code])
 
   return (
     <Container>
       <Header>{account.name}</Header>
       <Code>{otp}</Code>
-      <button onClick={() => setRefresh(Date.now())}>Refresh</button>
+      <Validation>{remaining} seconds left</Validation>
     </Container>
   )
 }

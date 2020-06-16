@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { streamUserKey, decrypt, createUserKey, hash } from './utils/api'
-
-const Input = styled.input`
-  padding: 10px;
-  flex: 1 1 auto;
-  min-width: 0;
-  width: 100%;
-`
+import { createUserKey, streamUserKey } from './utils/api'
+import TextField from './TextField'
 
 const Button = styled.button`
   flex: 0 0 auto;
@@ -40,61 +34,38 @@ const Row = styled.div`
   }
 `
 
-const Options = styled.label`
-  align-self: start;
-  display: flex;
-  flex-wrap: nowrap;
-  flex-direction: row;
-  align-items: center;
-  width: 100%;
-`
-
 const Validation = styled.div`
   color: red;
 `
 
-function EnterPass ({ onSubmit }) {
+function EnterPass ({ onSetPass, uid }) {
   const [pass, setPass] = useState('')
+  const [error, setError] = useState(false)
   const [userKey, setUserKey] = useState(null)
-  const [failed, setFailed] = useState(false)
   const [ready, setReady] = useState(false)
-  const [savePass, setSavePass] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    const hashedPass = hash(pass)
+    onSetPass(pass)
 
-    if (!userKey || decrypt(userKey, hashedPass)) {
-      onSubmit(hashedPass)
-
-      if (savePass) {
-        window.sessionStorage.setItem('pass', hashedPass)
-      }
-
-      if (!userKey) {
-        createUserKey(hashedPass)
-      }
-    } else {
-      setFailed(true)
+    if (!userKey) {
+      createUserKey(pass)
+        .catch(err => setError(err.message))
     }
   }
 
   useEffect(() => {
-    const stream = streamUserKey()
-      .subscribe(res => {
-        setUserKey(res)
-
-        const savedPass = window.sessionStorage.getItem('pass')
-        if (savedPass && decrypt(res, savedPass)) {
-          onSubmit(savedPass)
-        } else {
+    if (uid) {
+      const stream = streamUserKey()
+        .subscribe(res => {
+          setUserKey(res)
           setReady(true)
-        }
-      })
+        })
 
-    return () => stream.unsubscribe()
-  }, [setUserKey, onSubmit])
+      return () => stream.unsubscribe()
+    }
+  }, [uid])
 
   if (!ready) {
     return null
@@ -102,11 +73,13 @@ function EnterPass ({ onSubmit }) {
 
   return (
     <Container onSubmit={handleSubmit}>
-      {userKey ? <span /> : (
-        <center>Enter a encryption passphrase below.<br />This is used for all future end-to-end encryption, so it's important that you remember it.<br />There's no way of retrieving it later.<br />Better write it down somewhere!</center>
-      )}
+      {userKey
+        ? <span />
+        : (
+          <center>Enter an encryption passphrase below.<br />This is used for all future end-to-end encryption, so it's important that you remember it.<br />There's no way of retrieving it later.<br />Better write it down somewhere!</center>
+        )}
       <Row>
-        <Input
+        <TextField
           value={pass}
           onChange={e => setPass(e.target.value)}
           placeholder="Enter passphrase"
@@ -117,12 +90,8 @@ function EnterPass ({ onSubmit }) {
           Done
         </Button>
       </Row>
-      <Options>
-        <input type="checkbox" value={savePass} onChange={(e) => setSavePass(e.target.checked)} />
-        Save passphrase in this session?
-      </Options>
-      {failed && (
-        <Validation>Wrong passphrase</Validation>
+      {!!error && (
+        <Validation>{error}</Validation>
       )}
     </Container>
   )

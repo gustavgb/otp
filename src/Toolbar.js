@@ -26,11 +26,10 @@ const User = styled.p`
   flex: 1 0 auto;
 `
 
-const Toolbar = ({ user, onToggleShow }) => {
+const Toolbar = ({ user }) => {
   return (
     <Row>
       <User>{user.email}</User>
-      <Button onClick={onToggleShow}>Show/hide disabled</Button>
       <Button onClick={() => auth.signOut()}>Sign out</Button>
     </Row>
   )

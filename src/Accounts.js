@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import styled from 'styled-components'
 import plus from './assets/plus.svg'
 import more from './assets/more.svg'
-import { toggleAccountDisabled } from './utils/api'
-import * as clipboard from 'clipboard-polyfill/dist/clipboard-polyfill.promise'
+import { toggleAccountDeleted } from './utils/api'
 
 const Sidebar = styled.div`
   border-right: 1px solid #ddd;
@@ -60,7 +59,7 @@ const AccountItem = styled.div`
   outline: none;
   cursor: pointer;
   position: relative;
-  opacity: ${props => props.disabled ? 0.3 : 1};
+  color: ${props => props.deleted ? 'red' : 'initial'};
 
   &:hover {
     background-color: #efefef;
@@ -128,6 +127,9 @@ const Accounts = ({ onSelect, accounts }) => {
   const menuIsOpen = !!menuAnchor
   const menuRef = useRef(null)
 
+  const filteredAccounts = accounts.filter(account => !account.deleted)
+  const selectedAccount = filteredAccounts.find(account => account.id === selected)
+
   const handleMoreOptions = (e, accountId) => {
     e.stopPropagation()
 
@@ -141,20 +143,13 @@ const Accounts = ({ onSelect, accounts }) => {
     })
   }
 
-  const handleDisable = () => {
+  const handleDelete = () => {
     if (selected) {
-      toggleAccountDisabled(selected)
+      toggleAccountDeleted(selected)
         .then(() => {
           setMenuAnchor(null)
           onSelect(null)
         })
-    }
-  }
-
-  const handleCopy = () => {
-    if (selected) {
-      clipboard.writeText(accounts.find(account => account.id === selected).code)
-        .then(() => setMenuAnchor(null))
     }
   }
 
@@ -176,16 +171,20 @@ const Accounts = ({ onSelect, accounts }) => {
         Accounts
         <AddButton onClick={() => onSelect('new')} />
       </Toolbar>
-      {accounts.map((account) => (
-        <AccountItem key={account.id} onClick={() => onSelect(account.id)} disabled={account.disabled}>
+      {filteredAccounts.map((account) => (
+        <AccountItem key={account.id} onClick={() => onSelect(account.id)} deleted={account.deleted}>
           {account.name}
           <MoreOptions onClick={e => handleMoreOptions(e, account.id)} />
         </AccountItem>
       ))}
       {menuIsOpen && (
         <Menu pos={menuAnchor} ref={menuRef}>
-          <MenuItem onClick={handleCopy}>Copy secret code</MenuItem>
-          <MenuItem onClick={handleDisable}>Enable/Disable</MenuItem>
+          {!selectedAccount.deleted && (
+            <MenuItem onClick={handleDelete}>Mark for deletion</MenuItem>
+          )}
+          {!!selectedAccount.deleted && (
+            <MenuItem onClick={handleDelete}>Restore account</MenuItem>
+          )}
         </Menu>
       )}
     </Sidebar>
