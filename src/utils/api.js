@@ -120,6 +120,7 @@ export const streamAccounts = (pass) => {
           if (decryptedName) {
             return {
               ...account,
+              deleted: account.deleted ? account.deleted.toDate() : false,
               name: decryptedName,
               code: decryptedCode
             }

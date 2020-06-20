@@ -6,26 +6,34 @@ import { Helmet } from 'react-helmet'
 import icon from './assets/icon.png'
 import { ThemeProvider, CssBaseline, createMuiTheme } from '@material-ui/core'
 import { SnackbarProvider } from 'notistack'
+import { BrowserRouter } from 'react-router-dom'
 
 const theme = createMuiTheme({
   mixins: {
     drawer: {
       width: 240
     }
+  },
+  palette: {
+    primary: {
+      main: '#c00'
+    }
   }
 })
 
 const Main = () => (
-  <ThemeProvider theme={theme}>
-    <SnackbarProvider maxSnack={10}>
-      <CssBaseline />
-      <Helmet>
-        <title>OTP</title>
-        <link rel="icon" href={icon} />
-      </Helmet>
-      <App />
-    </SnackbarProvider>
-  </ThemeProvider>
+  <BrowserRouter>
+    <ThemeProvider theme={theme}>
+      <SnackbarProvider maxSnack={10}>
+        <CssBaseline />
+        <Helmet>
+          <title>OTP</title>
+          <link rel="icon" href={icon} />
+        </Helmet>
+        <App />
+      </SnackbarProvider>
+    </ThemeProvider>
+  </BrowserRouter>
 )
 
 ReactDOM.render(

@@ -1,9 +1,10 @@
 import React from 'react'
 import { toggleAccountDeleted } from './utils/api'
-import { Divider, Box, Button, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Hidden, Drawer, useTheme } from '@material-ui/core'
+import { Divider, Box, Button, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Hidden, Drawer, useTheme, ListItemIcon } from '@material-ui/core'
 import DeleteIcon from '@material-ui/icons/Delete'
 import { makeStyles } from '@material-ui/styles'
 import { useSnackbar } from 'notistack'
+import { useHistory } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
@@ -19,15 +20,16 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Accounts = ({ onSelect, accounts, selected, onChangeMobileOpen, mobileOpen }) => {
+const Accounts = ({ accounts, selected, onChangeMobileOpen, mobileOpen }) => {
   const classes = useStyles()
   const theme = useTheme()
   const { enqueueSnackbar } = useSnackbar()
+  const { push } = useHistory()
 
   const activeAccounts = accounts.filter(account => !account.deleted)
 
   const handleSelectDrawerItem = (value) => {
-    onSelect(value)
+    push('/' + value)
     onChangeMobileOpen(false)
   }
 
@@ -36,7 +38,7 @@ const Accounts = ({ onSelect, accounts, selected, onChangeMobileOpen, mobileOpen
       const selectedAccount = accounts.find(account => account.id === selected)
       toggleAccountDeleted(selected)
         .then(() => {
-          onSelect(null)
+          push('/')
           enqueueSnackbar('Account deleted: ' + selectedAccount.name, { variant: 'success' })
         })
         .catch(err => {
@@ -74,6 +76,15 @@ const Accounts = ({ onSelect, accounts, selected, onChangeMobileOpen, mobileOpen
             )}
           </ListItem>
         ))}
+      </List>
+      <Divider />
+      <List>
+        <ListItem button onClick={() => handleSelectDrawerItem('trash')}>
+          <ListItemIcon>
+            <DeleteIcon />
+          </ListItemIcon>
+          <ListItemText primary="Trash" />
+        </ListItem>
       </List>
     </div>
   );

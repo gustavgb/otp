@@ -2,17 +2,20 @@ import React, { useState, useEffect } from 'react'
 import generateCode from './utils/generateCode'
 import { Typography, Grid, Box, CircularProgress, Hidden } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
+import { usePass } from './utils/pass'
 
 const useStyles = makeStyles(theme => ({
   code: {
+    letterSpacing: '0.2em',
+    marginRight: '-0.2em',
     [theme.breakpoints.up('sm')]: {
       letterSpacing: '0.4em',
-      marginRight: '-0.4em',
-      lineHeight: '1em'
+      marginRight: '-0.4em'
     },
     [theme.breakpoints.up('md')]: {
       letterSpacing: '1em',
-      marginRight: '0'
+      marginRight: '0',
+      lineHeight: '1em'
     }
   }
 }))
@@ -22,6 +25,7 @@ const Account = ({ account = {} }) => {
   const [otp, setOtp] = useState('')
   const [remaining, setRemaining] = useState(0)
   const code = account ? account.code : null
+  const pass = usePass()
 
   useEffect(() => {
     let unmounted = false
@@ -43,7 +47,15 @@ const Account = ({ account = {} }) => {
     return () => {
       unmounted = true
     }
-  }, [remaining, code])
+  }, [remaining, code, pass])
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (code) {
+        setOtp(generateCode(code))
+      }
+    }, 500)
+  }, [code])
 
   return (
     <Grid container direction="column">
@@ -60,7 +72,7 @@ const Account = ({ account = {} }) => {
                 </Grid>
                 <Hidden smDown implementation="css">
                   <Grid item>
-                    <CircularProgress value={remaining / 30 * 100} variant="static" color="secondary" />
+                    <CircularProgress value={remaining / 30 * 100} variant="static" />
                   </Grid>
                 </Hidden>
               </Grid>
@@ -68,7 +80,7 @@ const Account = ({ account = {} }) => {
           </Grid>
           <Hidden mdUp implementation="css">
             <Grid item>
-              <CircularProgress value={remaining / 30 * 100} variant="static" color="secondary" />
+              <CircularProgress value={remaining / 30 * 100} variant="static" />
             </Grid>
           </Hidden>
         </Grid>

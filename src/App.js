@@ -14,6 +14,9 @@ import AddAccount from './AddAccount'
 import clsx from 'clsx';
 import Accounts from './Accounts';
 import LogoutIcon from '@material-ui/icons/ExitToApp'
+import { Switch, Route, useHistory } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
+import Trash from './Trash';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -45,14 +48,13 @@ const useStyles = makeStyles((theme) => ({
 const App = () => {
   const [pass, setPass] = useState(null)
   const [user, setUser] = useState(null)
-  const [selected, setSelected] = useState(null)
   const [accounts, setAccounts] = useState([])
   const [ready, setReady] = useState(false)
+  const { push } = useHistory()
+  const { enqueueSnackbar } = useSnackbar()
 
   const classes = useStyles();
   const [mobileOpen, setMobileOpen] = React.useState(false);
-
-  const selectedAccount = accounts.find((account) => account.id === selected)
 
   const uid = user ? user.uid : null
 
@@ -63,13 +65,16 @@ const App = () => {
 
     try {
       const stream = streamAccounts(pass)
-        .subscribe(setAccounts)
+        .subscribe(res => {
+          setAccounts(res)
+        })
 
       return () => stream.unsubscribe()
     } catch (e) {
       console.log(e)
+      enqueueSnackbar(e.message, { variant: 'error' })
     }
-  }, [setAccounts, pass, user])
+  }, [setAccounts, pass, user, enqueueSnackbar])
 
   useEffect(() => {
     auth.onAuthStateChanged(user => {
@@ -78,11 +83,11 @@ const App = () => {
 
       if (!user) {
         setAccounts([])
-        setSelected(null)
+        push('/')
         setPass(null)
       }
     })
-  }, [])
+  }, [push])
 
   if (!ready) {
     return null
@@ -129,21 +134,31 @@ const App = () => {
           </Toolbar>
         </AppBar>
         {!!pass && (
-          <Accounts mobileOpen={mobileOpen} onChangeMobileOpen={setMobileOpen} accounts={accounts} onSelect={setSelected} selected={selected} />
+          <Route
+            path="/:id?"
+            render={({ match: { params: { id } } }) => (
+              <Accounts mobileOpen={mobileOpen} onChangeMobileOpen={setMobileOpen} accounts={accounts} selected={id} />
+            )}
+          />
         )}
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          {user
-            ? pass
-              ? (selected === 'new'
-                  ? <AddAccount onSelect={setSelected} />
-                  : selectedAccount ? <Account key={selected} account={selectedAccount} /> : null)
-              : (
-                <EnterPass onSetPass={setPass} uid={uid} />
-              )
-            : (
-              <Login />
-            )}
+          {user && pass && (
+            <Switch>
+              <Route path="/new" render={() => <AddAccount />} />
+              <Route path="/trash" render={() => <Trash accounts={accounts.filter(account => account.deleted)} />} />
+              <Route
+                path="/:id"
+                render={({ match: { params: { id } } }) => <Account key={id} account={accounts.find(account => account.id === id)} />}
+              />
+            </Switch>
+          )}
+          {user && !pass && (
+            <EnterPass onSetPass={setPass} uid={uid} />
+          )}
+          {!user && (
+            <Login />
+          )}
         </main>
       </div>
     </PassProvider>
