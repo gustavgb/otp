@@ -1,61 +1,56 @@
-import React, { useState, useEffect } from 'react'
-import styled from 'styled-components'
+import React, { useState, useEffect } from 'react';
+import AppBar from '@material-ui/core/AppBar';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import { makeStyles } from '@material-ui/core/styles';
 import { PassProvider } from './utils/pass'
 import Login from './Login'
 import { auth, streamAccounts } from './utils/api'
-import Accounts from './Accounts'
 import Account from './Account'
 import EnterPass from './EnterPass'
 import AddAccount from './AddAccount'
-import Toolbar from './Toolbar'
-import bananas from './assets/bananas.png'
+import clsx from 'clsx';
+import Accounts from './Accounts';
+import LogoutIcon from '@material-ui/icons/ExitToApp'
 
-const Root = styled.main`
-  display: grid;
-  grid-template-columns: 20vw 1fr 20vw;
-  grid-template-rows: 20vh 1fr 20vh;
-  grid-template-areas: ". . ." ". main ." ". . .";
-  background-image: url(${bananas});
-  min-height: 100vh;
-
-  @media (max-width: 680px) {
-    grid-template-areas: "main main main" "main main main" "main main main";
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex'
+  },
+  appBar: {
+    [theme.breakpoints.up('sm')]: {
+      width: `calc(100% - ${theme.mixins.drawer.width}px)`,
+      marginLeft: theme.mixins.drawer.width
+    },
+  },
+  menuButton: {
+    marginRight: theme.spacing(2),
+    [theme.breakpoints.up('sm')]: {
+      display: 'none'
+    },
+  },
+  // necessary for content to be below app bar
+  toolbar: theme.mixins.toolbar,
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing(3)
+  },
+  title: {
+    flexGrow: 1
   }
-`
+}));
 
-const Content = styled.div`
-  grid-area: main;
-  display: grid;
-  grid-template-columns: 1fr 2fr [end];
-  grid-template-rows: 1fr min-content [end];
-  grid-template-areas: "sidebar content" "toolbar toolbar";
-  gap: 16px;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0px 2px 4px -1px rgba(0,0,0,0.2),0px 4px 5px 0px rgba(0,0,0,0.14),0px 1px 10px 0px rgba(0,0,0,0.12);
-  padding: 16px;
-  max-height: 60vh;
-
-  & > * {
-    max-height: 100%;
-    overflow-y: auto;
-  }
-
-  @media (max-width: 680px) {
-    max-height: 100vh;
-    grid-template-columns: 1fr [end];
-    grid-template-rows: 1fr 2fr min-content [end];
-    grid-template-areas: "content" "sidebar" "toolbar";
-    border-radius: 0;
-  }
-`
-
-function App () {
+const App = () => {
   const [pass, setPass] = useState(null)
   const [user, setUser] = useState(null)
   const [selected, setSelected] = useState(null)
   const [accounts, setAccounts] = useState([])
   const [ready, setReady] = useState(false)
+
+  const classes = useStyles();
+  const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const selectedAccount = accounts.find((account) => account.id === selected)
 
@@ -93,31 +88,66 @@ function App () {
     return null
   }
 
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
   return (
     <PassProvider value={pass}>
-      <Root>
-        <Content>
+      <div className={classes.root}>
+        <AppBar position="fixed" className={clsx(!!pass && classes.appBar)}>
+          <Toolbar>
+            {!!pass && (
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                className={classes.menuButton}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+            <Typography variant="h6" noWrap className={classes.title}>
+              One Time Passwords
+            </Typography>
+            {user && (
+              <>
+                <Typography variant="body1" noWrap color="inherit">
+                  {user.email}
+                </Typography>
+                <IconButton
+                  color="inherit"
+                  aria-label="Logout"
+                  edge="end"
+                  onClick={() => auth.signOut()}
+                >
+                  <LogoutIcon />
+                </IconButton>
+              </>
+            )}
+          </Toolbar>
+        </AppBar>
+        {!!pass && (
+          <Accounts mobileOpen={mobileOpen} onChangeMobileOpen={setMobileOpen} accounts={accounts} onSelect={setSelected} selected={selected} />
+        )}
+        <main className={classes.content}>
+          <div className={classes.toolbar} />
           {user
             ? pass
-              ? (
-                <>
-                  <Accounts onSelect={setSelected} accounts={accounts} />
-                  {selected === 'new'
-                    ? <AddAccount onSelect={setSelected} />
-                    : selectedAccount ? <Account key={selected} account={selectedAccount} /> : null}
-                </>
-              )
+              ? (selected === 'new'
+                  ? <AddAccount onSelect={setSelected} />
+                  : selectedAccount ? <Account key={selected} account={selectedAccount} /> : null)
               : (
                 <EnterPass onSetPass={setPass} uid={uid} />
               )
             : (
               <Login />
             )}
-          {user && <Toolbar user={user} />}
-        </Content>
-      </Root>
+        </main>
+      </div>
     </PassProvider>
-  )
+  );
 }
 
-export default App
+export default App;

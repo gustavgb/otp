@@ -1,193 +1,113 @@
-import React, { useState, useRef, useEffect } from 'react'
-import styled from 'styled-components'
-import plus from './assets/plus.svg'
-import more from './assets/more.svg'
+import React from 'react'
 import { toggleAccountDeleted } from './utils/api'
+import { Divider, Box, Button, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Hidden, Drawer, useTheme } from '@material-ui/core'
+import DeleteIcon from '@material-ui/icons/Delete'
+import { makeStyles } from '@material-ui/styles'
+import { useSnackbar } from 'notistack'
 
-const Sidebar = styled.div`
-  border-right: 1px solid #ddd;
-  padding-right: 16px;
-  grid-area: sidebar;
-
-  @media (max-width: 680px) {
-    border-top: 1px solid #ddd;
-    border-right: none;
+const useStyles = makeStyles((theme) => ({
+  drawer: {
+    [theme.breakpoints.up('sm')]: {
+      width: theme.mixins.drawer.width,
+      flexShrink: 0
+    },
+  },
+  // necessary for content to be below app bar
+  toolbar: theme.mixins.toolbar,
+  drawerPaper: {
+    width: theme.mixins.drawer.width
   }
-`
+}));
 
-const Toolbar = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+const Accounts = ({ onSelect, accounts, selected, onChangeMobileOpen, mobileOpen }) => {
+  const classes = useStyles()
+  const theme = useTheme()
+  const { enqueueSnackbar } = useSnackbar()
 
-  font-size: 1rem;
-`
+  const activeAccounts = accounts.filter(account => !account.deleted)
 
-const AddButton = styled.button`
-  border: none;
-  background-image: url(${plus});
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 1em;
-  height: 1em;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity .5s linear;
-  margin: 1em;
-
-  &:hover {
-    opacity: 1;
-  }
-`
-
-const AccountItem = styled.div`
-  text-align: center;
-  font-size: 1rem;
-  padding: 1rem;
-  max-width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  word-break: break-all;
-  background-color: white;
-  transition: all .5s ease-out;
-  border: none;
-  border-bottom: 1px solid #ddd;
-  width: 100%;
-  outline: none;
-  cursor: pointer;
-  position: relative;
-  color: ${props => props.deleted ? 'red' : 'initial'};
-
-  &:hover {
-    background-color: #efefef;
-  }
-
-  &:focus {
-    outline: none;
-  }
-`
-
-const MoreOptions = styled.button`
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  background-color: transparent;
-  background-image: url(${more});
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  width: 1.5em;
-  height: 1.5em;
-  border-radius: 50%;
-  z-index: 10;
-
-  &:hover {
-    background-color: #ddd;
-  }
-`
-
-const Menu = styled.div.attrs(props => ({
-  style: {
-    top: `${props.pos.y}px`,
-    left: `${props.pos.x}px`
-  }
-}))`
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0px 2px 4px -1px rgba(0,0,0,0.2),0px 4px 5px 0px rgba(0,0,0,0.14),0px 1px 10px 0px rgba(0,0,0,0.12);
-
-  position: fixed;
-  z-index: 20;
-  padding: 0 5px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-`
-
-const MenuItem = styled.button`
-  padding: 5px;
-  background-color: transparent;
-  border: none;
-  text-align: left;
-
-  &:hover {
-    background-color: #eee;
-  }
-`
-
-const Accounts = ({ onSelect, accounts }) => {
-  const [menuAnchor, setMenuAnchor] = useState(null)
-  const [selected, setSelected] = useState(null)
-  const menuIsOpen = !!menuAnchor
-  const menuRef = useRef(null)
-
-  const filteredAccounts = accounts.filter(account => !account.deleted)
-  const selectedAccount = filteredAccounts.find(account => account.id === selected)
-
-  const handleMoreOptions = (e, accountId) => {
-    e.stopPropagation()
-
-    setSelected(accountId)
-
-    const rect = e.currentTarget.getBoundingClientRect()
-
-    setMenuAnchor({
-      x: rect.x + rect.width / 2,
-      y: rect.y + rect.height / 2
-    })
+  const handleSelectDrawerItem = (value) => {
+    onSelect(value)
+    onChangeMobileOpen(false)
   }
 
   const handleDelete = () => {
     if (selected) {
+      const selectedAccount = accounts.find(account => account.id === selected)
       toggleAccountDeleted(selected)
         .then(() => {
-          setMenuAnchor(null)
           onSelect(null)
+          enqueueSnackbar('Account deleted: ' + selectedAccount.name, { variant: 'success' })
+        })
+        .catch(err => {
+          console.log(err)
+          enqueueSnackbar(err.message, { variant: 'error' })
         })
     }
   }
 
-  useEffect(() => {
-    const handler = e => {
-      if (menuIsOpen && menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuAnchor(null)
-      }
-    }
-
-    window.addEventListener('click', handler)
-
-    return () => window.removeEventListener('click', handler)
-  }, [menuIsOpen])
+  const drawer = (
+    <div>
+      <div className={classes.toolbar} />
+      <Divider />
+      <Box p={2}>
+        <Button
+          onClick={() => handleSelectDrawerItem('new')}
+          variant="contained"
+          color="primary"
+          fullWidth
+        >
+          Add account
+        </Button>
+      </Box>
+      <Divider />
+      <List>
+        {activeAccounts.map((account) => (
+          <ListItem button key={account.id} onClick={() => handleSelectDrawerItem(account.id)}>
+            <ListItemText primary={account.name} />
+            {selected === account.id && (
+              <ListItemSecondaryAction>
+                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete()}>
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            )}
+          </ListItem>
+        ))}
+      </List>
+    </div>
+  );
 
   return (
-    <Sidebar>
-      <Toolbar>
-        Accounts
-        <AddButton onClick={() => onSelect('new')} />
-      </Toolbar>
-      {filteredAccounts.map((account) => (
-        <AccountItem key={account.id} onClick={() => onSelect(account.id)} deleted={account.deleted}>
-          {account.name}
-          <MoreOptions onClick={e => handleMoreOptions(e, account.id)} />
-        </AccountItem>
-      ))}
-      {menuIsOpen && (
-        <Menu pos={menuAnchor} ref={menuRef}>
-          {!selectedAccount.deleted && (
-            <MenuItem onClick={handleDelete}>Mark for deletion</MenuItem>
-          )}
-          {!!selectedAccount.deleted && (
-            <MenuItem onClick={handleDelete}>Restore account</MenuItem>
-          )}
-        </Menu>
-      )}
-    </Sidebar>
+    <nav className={classes.drawer} aria-label="Accounts">
+      <Hidden smUp implementation="css">
+        <Drawer
+          variant="temporary"
+          anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+          open={mobileOpen}
+          onClose={() => onChangeMobileOpen(false)}
+          classes={{
+            paper: classes.drawerPaper,
+          }}
+          ModalProps={{
+            keepMounted: true
+          }}
+        >
+          {drawer}
+        </Drawer>
+      </Hidden>
+      <Hidden xsDown implementation="css">
+        <Drawer
+          classes={{
+            paper: classes.drawerPaper,
+          }}
+          variant="permanent"
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Hidden>
+    </nav>
   )
 }
 

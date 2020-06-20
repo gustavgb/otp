@@ -1,30 +1,13 @@
 import React, { useState } from 'react'
-import styled from 'styled-components'
 import { auth } from './utils/api'
-import TextField from './TextField'
-
-const LoginForm = styled.form`
-  grid-column: 1 / end;
-  grid-row: 1 / end;
-`
-
-const Label = styled.p`
-
-`
-
-const Button = styled.button`
-  display: block;
-  margin-top: 16px;
-`
-
-const Validation = styled.div`
-  color: red;
-`
+import { Container, TextField, Button, Grid } from '@material-ui/core'
+import { useSnackbar } from 'notistack'
+import PasswordField from './PasswordField'
 
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
+  const { enqueueSnackbar } = useSnackbar()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -32,23 +15,47 @@ const Login = () => {
       await auth.signInWithEmailAndPassword(email, password)
     } catch (err) {
       console.log(err)
-      setError(err.message)
+      enqueueSnackbar(err.message, { variant: 'error' })
     }
   }
 
   return (
-    <LoginForm onSubmit={handleSubmit}>
-      <label>
-        <Label>Email</Label>
-        <TextField autoFocus value={email} onChange={e => setEmail(e.target.value)} />
-      </label>
-      <label>
-        <Label>Password</Label>
-        <TextField type="password" value={password} onChange={e => setPassword(e.target.value)} />
-      </label>
-      <Button type="submit">Login</Button>
-      {!!error && <Validation>{error}</Validation>}
-    </LoginForm>
+    <Container maxWidth="xs">
+      <form onSubmit={handleSubmit}>
+        <Grid container direction="column" spacing={2}>
+          <Grid item>
+            <TextField
+              autoFocus
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              variant="outlined"
+              fullWidth
+              label="Email"
+            />
+          </Grid>
+          <Grid item>
+            <PasswordField
+              type="password"
+              value={password}
+              onChange={setPassword}
+              fullWidth
+              label="Password"
+            />
+          </Grid>
+          <Grid item>
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              color="primary"
+              fullWidth
+            >
+              Login
+            </Button>
+          </Grid>
+        </Grid>
+      </form>
+    </Container>
   )
 }
 

@@ -1,39 +1,24 @@
 import React, { useState, useEffect } from 'react'
-import styled from 'styled-components'
 import generateCode from './utils/generateCode'
+import { Typography, Grid, Box, CircularProgress, Hidden } from '@material-ui/core'
+import { makeStyles } from '@material-ui/styles'
 
-const Container = styled.div`
-  padding: 16px 0;
-  display: grid;
-  grid-template-rows: repeat(3, 1fr);
-  width: 100%;
-  height: 100%;
-  place-items: center;
-  grid-area: content;
-
-  & > * {
-    margin: 0;
+const useStyles = makeStyles(theme => ({
+  code: {
+    [theme.breakpoints.up('sm')]: {
+      letterSpacing: '0.4em',
+      marginRight: '-0.4em',
+      lineHeight: '1em'
+    },
+    [theme.breakpoints.up('md')]: {
+      letterSpacing: '1em',
+      marginRight: '0'
+    }
   }
-`
-
-const Header = styled.p`
-  margin-top: 0;
-  font-weight: bold;
-`
-
-const Code = styled.p`
-  font-size: 2rem;
-  font-weight: bold;
-  font-family: monospace;
-  letter-spacing: 1rem;
-  margin-right: -1rem;
-`
-
-const Validation = styled.div`
-  color: red;
-`
+}))
 
 const Account = ({ account = {} }) => {
+  const classes = useStyles()
   const [otp, setOtp] = useState('')
   const [remaining, setRemaining] = useState(0)
   const code = account ? account.code : null
@@ -61,11 +46,34 @@ const Account = ({ account = {} }) => {
   }, [remaining, code])
 
   return (
-    <Container>
-      <Header>{account.name}</Header>
-      <Code>{otp}</Code>
-      <Validation>{remaining} seconds left</Validation>
-    </Container>
+    <Grid container direction="column">
+      <Box mt={5}>
+        <Grid container direction="column" spacing={4} alignItems="center">
+          <Grid item>
+            <Typography variant="h6">{account.name}</Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="h3" className={classes.code}>
+              <Grid container alignItems="center">
+                <Grid item>
+                  {otp}
+                </Grid>
+                <Hidden smDown implementation="css">
+                  <Grid item>
+                    <CircularProgress value={remaining / 30 * 100} variant="static" color="secondary" />
+                  </Grid>
+                </Hidden>
+              </Grid>
+            </Typography>
+          </Grid>
+          <Hidden mdUp implementation="css">
+            <Grid item>
+              <CircularProgress value={remaining / 30 * 100} variant="static" color="secondary" />
+            </Grid>
+          </Hidden>
+        </Grid>
+      </Box>
+    </Grid>
   )
 }
 

@@ -1,19 +1,31 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './assets/global.css'
 import App from './App'
 import * as serviceWorker from './serviceWorker'
 import { Helmet } from 'react-helmet'
 import icon from './assets/icon.png'
+import { ThemeProvider, CssBaseline, createMuiTheme } from '@material-ui/core'
+import { SnackbarProvider } from 'notistack'
+
+const theme = createMuiTheme({
+  mixins: {
+    drawer: {
+      width: 240
+    }
+  }
+})
 
 const Main = () => (
-  <>
-    <Helmet>
-      <title>OTP</title>
-      <link rel="icon" href={icon} />
-    </Helmet>
-    <App />
-  </>
+  <ThemeProvider theme={theme}>
+    <SnackbarProvider maxSnack={10}>
+      <CssBaseline />
+      <Helmet>
+        <title>OTP</title>
+        <link rel="icon" href={icon} />
+      </Helmet>
+      <App />
+    </SnackbarProvider>
+  </ThemeProvider>
 )
 
 ReactDOM.render(
