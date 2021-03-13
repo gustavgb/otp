@@ -26,7 +26,7 @@ const Trash = ({ accounts }) => {
       <Paper>
         <List>
           {accounts.map((account, index) => (
-            <>
+            <React.Fragment key={account.id}>
               {index !== 0 && <Divider />}
               <ListItem>
                 <ListItemText primary={account.name} secondary={`Deleted on: ${dateFormat(account.deleted)}`} />
@@ -36,7 +36,7 @@ const Trash = ({ accounts }) => {
                   </IconButton>
                 </ListItemSecondaryAction>
               </ListItem>
-            </>
+            </React.Fragment>
           ))}
         </List>
       </Paper>

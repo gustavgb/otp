@@ -145,7 +145,7 @@ const App = () => {
           <div className={classes.toolbar} />
           {user && pass && (
             <Switch>
-              <Route path="/new" render={() => <AddAccount />} />
+              <Route path="/new" render={() => <AddAccount onSelect={id => push('/' + id)} />} />
               <Route path="/trash" render={() => <Trash accounts={accounts.filter(account => account.deleted)} />} />
               <Route
                 path="/:id"
