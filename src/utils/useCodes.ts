@@ -50,7 +50,7 @@ export default function useCodes(accounts): [Account[], number] {
     setTimeout(() => {
       updateCodes()
       setRemaining(getTime())
-    }, 50)
+    }, 150)
   }, [updateCodes])
 
   return [codes, remaining]
