@@ -3,20 +3,24 @@ import { addAccount } from '@utils/api'
 import { TextField, Button, Grid } from '@mui/material'
 import { useSnackbar } from 'notistack'
 import PasswordField from '@Components/PasswordField'
+import { useNavigate } from 'react-router-dom'
 
 const AddAccount = () => {
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
   const [pass, setPass] = useState('')
   const { enqueueSnackbar } = useSnackbar()
+  const navigate = useNavigate()
 
   const handleSubmit = e => {
     e.preventDefault()
 
-    addAccount(name, code, pass).catch(err => {
-      console.log(err)
-      enqueueSnackbar(err.message, { variant: 'error' })
-    })
+    addAccount(name, code, pass)
+      .then(() => navigate('/'))
+      .catch(err => {
+        console.log(err)
+        enqueueSnackbar(err.message, { variant: 'error' })
+      })
   }
 
   return (
