@@ -27,7 +27,7 @@ const theme = createTheme({
 const Main = () => (
   <BrowserRouter>
     <ThemeProvider theme={theme}>
-      <SnackbarProvider maxSnack={10}>
+      <SnackbarProvider maxSnack={3}>
         <CssBaseline />
         <App />
       </SnackbarProvider>
