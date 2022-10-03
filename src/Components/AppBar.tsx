@@ -1,5 +1,5 @@
 import React from 'react'
-import { AccountCircle, Add, Edit } from '@mui/icons-material'
+import { AccountCircle, Add, Edit, MoreVert } from '@mui/icons-material'
 import {
   AppBar,
   ButtonBase,
@@ -60,13 +60,18 @@ export default function CustomAppBar({
     <>
       <AppBar position="fixed">
         <Toolbar>
-          <ButtonBase onClick={() => navigate('/')}>
+          <ButtonBase
+            onClick={() => navigate('/')}
+            sx={{ display: { xs: routeName ? 'none' : 'block', md: 'inline' } }}
+          >
             <Typography variant="h6" noWrap>
               One Time Passwords
             </Typography>
           </ButtonBase>
-          <Typography variant="h6" component="span">
+          <Typography variant="h6" component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
             {routeName && <>&nbsp;&rarr;&nbsp;</>}
+          </Typography>
+          <Typography variant="h6" component="span">
             {routeName}
           </Typography>
           <Grid item flexGrow={1} />
@@ -79,6 +84,7 @@ export default function CustomAppBar({
                     color="inherit"
                     aria-label="add account"
                     onClick={() => navigate('/new')}
+                    sx={{ display: { xs: 'none', md: 'block' } }}
                   >
                     <Add />
                   </IconButton>
@@ -87,6 +93,7 @@ export default function CustomAppBar({
                     color="inherit"
                     aria-label="edit accounts"
                     onClick={() => navigate('/edit')}
+                    sx={{ display: { xs: 'none', md: 'block' } }}
                   >
                     <Edit />
                   </IconButton>
@@ -100,7 +107,8 @@ export default function CustomAppBar({
                 onClick={handleMenu}
                 color="inherit"
               >
-                <AccountCircle />
+                <AccountCircle sx={{ display: { xs: 'none', md: 'block' } }} />
+                <MoreVert sx={{ display: { xs: 'block', md: 'none' } }} />
               </IconButton>
               <Menu
                 id="menu-appbar"
@@ -126,17 +134,31 @@ export default function CustomAppBar({
                 {vaultUnlocked && [
                   <MenuItem
                     key="home"
-                    sx={{ justifyContent: 'center' }}
+                    sx={{ justifyContent: 'center', display: { xs: 'flex', md: 'none' } }}
                     onClick={menuNavigate('/')}
                   >
                     Home
+                  </MenuItem>,
+                  <MenuItem
+                    key="add"
+                    sx={{ justifyContent: 'center', display: { xs: 'flex', md: 'none' } }}
+                    onClick={menuNavigate('/new')}
+                  >
+                    Add account
+                  </MenuItem>,
+                  <MenuItem
+                    key="edit"
+                    sx={{ justifyContent: 'center', display: { xs: 'flex', md: 'none' } }}
+                    onClick={menuNavigate('/edit')}
+                  >
+                    Edit accounts
                   </MenuItem>,
                   <MenuItem
                     key="trash"
                     sx={{ justifyContent: 'center' }}
                     onClick={menuNavigate('/trash')}
                   >
-                    Trash
+                    Trashed accounts
                   </MenuItem>,
                   <MenuItem
                     key="export"

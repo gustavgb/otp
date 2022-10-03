@@ -2,15 +2,15 @@ import React, { useState } from 'react'
 import { addAccount } from '@utils/api'
 import { TextField, Button, Grid } from '@mui/material'
 import { useSnackbar } from 'notistack'
-import PasswordField from '@Components/PasswordField'
 import { useNavigate } from 'react-router-dom'
+import { usePass } from '@utils/pass'
 
 const AddAccount = () => {
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
-  const [pass, setPass] = useState('')
   const { enqueueSnackbar } = useSnackbar()
   const navigate = useNavigate()
+  const pass = usePass()
 
   const handleSubmit = e => {
     e.preventDefault()
@@ -43,15 +43,6 @@ const AddAccount = () => {
             onChange={e => setCode(e.target.value)}
             label="Account code"
             variant="outlined"
-            fullWidth
-          />
-        </Grid>
-        <Grid item>
-          <PasswordField
-            name="pass"
-            value={pass}
-            onChange={setPass}
-            label="Encryption pass"
             fullWidth
           />
         </Grid>

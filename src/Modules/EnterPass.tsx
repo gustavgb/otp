@@ -67,7 +67,13 @@ function EnterPass({ onSetPass, uid }) {
           Better write it down somewhere!
         </Center>
       )}
-      <PasswordField value={pass} onChange={setPass} fullWidth autoFocus />
+      <PasswordField
+        value={pass}
+        onChange={setPass}
+        label="Encryption password"
+        fullWidth
+        autoFocus
+      />
       <Box mt={2}>
         <Button fullWidth size="large" type="submit" variant="contained" color="primary">
           Unlock
