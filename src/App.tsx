@@ -10,9 +10,9 @@ import Trash from '@Modules/Trash'
 import styled from '@emotion/styled'
 import CustomAppBar from '@Components/AppBar'
 import Accounts from '@Modules/Accounts'
-import { Box, Container } from '@mui/material'
 import EditAccounts from '@Modules/Edit'
 import ExportAccounts from '@Modules/Export'
+import { RouteLayout, Layout } from '@Components/Layout'
 
 const Root = styled.div``
 
@@ -73,21 +73,27 @@ const App = () => {
           vaultUnlocked={vaultUnlocked}
           username={user ? user.email : ''}
         />
-        <Container maxWidth="xs">
-          <Box pt={2}>
-            {vaultUnlocked && (
-              <Routes>
-                <Route path="/new" element={<AddAccount />} />
-                <Route path="/trash" element={<Trash accounts={trash} />} />
-                <Route path="/edit" element={<EditAccounts accounts={accounts} />} />
-                <Route path="/export" element={<ExportAccounts accounts={accounts} />} />
-                <Route index element={<Accounts accounts={accounts} />} />
-              </Routes>
-            )}
-            {loggedIn && !vaultUnlocked && <EnterPass onSetPass={setPass} uid={uid} />}
-            {!loggedIn && <Login />}
-          </Box>
-        </Container>
+        {vaultUnlocked && (
+          <Routes>
+            <Route element={<RouteLayout />}>
+              <Route path="/new" element={<AddAccount />} />
+              <Route path="/trash" element={<Trash accounts={trash} />} />
+              <Route path="/edit" element={<EditAccounts accounts={accounts} />} />
+              <Route path="/export" element={<ExportAccounts accounts={accounts} />} />
+            </Route>
+            <Route index element={<Accounts accounts={accounts} />} />
+          </Routes>
+        )}
+        {loggedIn && !vaultUnlocked && (
+          <Layout>
+            <EnterPass onSetPass={setPass} uid={uid} />
+          </Layout>
+        )}
+        {!loggedIn && (
+          <Layout>
+            <Login />
+          </Layout>
+        )}
       </Root>
     </PassProvider>
   )

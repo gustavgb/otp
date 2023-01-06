@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { CssBaseline } from '@mui/material'
 import BufferPolyfill from 'buffer'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
+import './index.css'
 
 // This is necessary for crypto-js to work with Webpack 5
 /* eslint-disable-next-line */
